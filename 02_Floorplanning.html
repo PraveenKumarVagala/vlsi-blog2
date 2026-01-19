@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floorplanning | PD Blog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1><a href="index.html">🔧 Physical Design Blog</a></h1>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="01_PD_Introduction.html">← Prev</a>
+                <a href="03_Power_Planning.html">Next →</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="article-header">
+            <span class="article-number">Part 2 of 10</span>
+            <h1>Floorplanning</h1>
+            <p class="subtitle">Defining chip size and organizing major blocks</p>
+            <p class="author">By <strong>Praveen Kumar Vagala</strong></p>
+            <div class="view-counter">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                <span class="view-count">1,056</span> views
+            </div>
+        </div>
+
+        <h2>What is Floorplanning?</h2>
+        <p>Floorplanning is the first step - defining the chip's physical dimensions and placing major components.</p>
+
+<div class="diagram">┌────────────────────────────────────────────────────────────────┐
+│                         I/O Pads (Top)                         │
+├────────┬───────────────────────────────────────────────┬───────┤
+│        │                                               │       │
+│  I/O   │                  CORE AREA                    │  I/O  │
+│ Pads   │  ┌──────────┐              ┌──────────┐      │ Pads  │
+│(Left)  │  │  MACRO   │              │  MACRO   │      │(Right)│
+│        │  │  (SRAM)  │              │  (PLL)   │      │       │
+│        │  └──────────┘              └──────────┘      │       │
+│        │                                               │       │
+│        │        Standard Cell Placement Area           │       │
+│        │                                               │       │
+├────────┴───────────────────────────────────────────────┴───────┤
+│                        I/O Pads (Bottom)                       │
+└────────────────────────────────────────────────────────────────┘</div>
+
+        <h2>Key Terms</h2>
+        <table>
+            <tr><th>Term</th><th>Description</th></tr>
+            <tr><td>Die Area</td><td>Total chip area (includes I/O pads)</td></tr>
+            <tr><td>Core Area</td><td>Area available for logic (inside I/O ring)</td></tr>
+            <tr><td>Utilization</td><td>% of core area filled with cells</td></tr>
+            <tr><td>Aspect Ratio</td><td>Width / Height of core</td></tr>
+            <tr><td>Macro</td><td>Large pre-designed block (SRAM, PLL, etc.)</td></tr>
+        </table>
+
+        <h2>Die Size Calculation</h2>
+<pre><code>Core Area = Total Cell Area / Target Utilization
+
+Example:
+  Total cell area = 1,000,000 um²
+  Target utilization = 70%
+  
+  Core Area = 1,000,000 / 0.70 = 1,428,571 um²
+  
+  If aspect ratio = 1:
+    Width = Height = √1,428,571 = 1,195 um
+
+Die Area = Core Area + I/O Pad Area + Margins</code></pre>
+
+        <div class="tip">
+            <strong>Utilization Guidelines:</strong><br>
+            60-70%: Standard (room for optimization)<br>
+            70-80%: Tight (challenging timing closure)<br>
+            80%+: Very tight (may not close timing)
+        </div>
+
+        <h2>Macro Placement</h2>
+        <p><strong>Macros must be placed first</strong> - they're fixed during placement.</p>
+
+        <h3>Macro Placement Guidelines</h3>
+<div class="diagram">Good Placement:              Bad Placement:
+
+┌────────────────────┐      ┌────────────────────┐
+│ ┌────┐      ┌────┐│      │    ┌────┐          │
+│ │SRAM│      │SRAM││      │    │SRAM│ ┌────┐   │
+│ └────┘      └────┘│      │ ┌──┴────┴─┤SRAM│   │
+│                    │      │ │         └────┘   │
+│   Standard Cells   │      │ │ Congested!       │
+│                    │      │ └──────────────────│
+└────────────────────┘      └────────────────────┘
+Macros on edges,            Macros blocking
+clear routing channels      routing paths</div>
+
+        <h3>Macro Placement Rules</h3>
+        <ul>
+            <li>Place macros along chip edges</li>
+            <li>Keep macros away from core center</li>
+            <li>Align macro pins to routing grid</li>
+            <li>Leave space (channels) between macros</li>
+            <li>Consider data flow - place related macros close</li>
+        </ul>
+
+        <h2>Macro Halos and Blockages</h2>
+
+<div class="diagram">         ┌─────────────────┐
+         │     Halo        │
+         │  ┌───────────┐  │
+         │  │           │  │
+         │  │   MACRO   │  │
+         │  │           │  │
+         │  └───────────┘  │
+         │                 │
+         └─────────────────┘
+         
+Halo: Keep-out zone around macro
+      (no cells placed here)</div>
+
+<pre><code># Innovus command example
+createPlaceBlockage -type hard -box {x1 y1 x2 y2}
+createPlaceBlockage -type soft -box {x1 y1 x2 y2}  # Soft = can be violated
+
+# Halo around macro
+createPlaceBlockage -inst SRAM1 -haloDistance {5 5 5 5}</code></pre>
+
+        <h2>I/O Planning</h2>
+
+<div class="diagram">          Signal Pads    Power Pads
+               ↓             ↓
+     ┌────┬────┬────┬────┬────┬────┬────┬────┐
+     │ IO │ IO │ IO │VDD │VSS │ IO │ IO │ IO │  ← Pad Ring
+     ├────┴────┴────┴────┴────┴────┴────┴────┤
+     │                                        │
+     │              CORE                      │
+     │                                        │
+     └────────────────────────────────────────┘</div>
+
+        <h3>Pin Placement Considerations</h3>
+        <ul>
+            <li>Group related signals together</li>
+            <li>Place pins near their internal connections</li>
+            <li>Power pins distributed evenly</li>
+            <li>Consider signal integrity (separate sensitive signals)</li>
+        </ul>
+
+        <h2>Floorplan Checks</h2>
+        <table>
+            <tr><th>Check</th><th>What to Verify</th></tr>
+            <tr><td>Utilization</td><td>60-70% target range</td></tr>
+            <tr><td>Macro overlap</td><td>No overlapping macros</td></tr>
+            <tr><td>Routing channels</td><td>Enough space between macros</td></tr>
+            <tr><td>Power grid space</td><td>Room for power straps</td></tr>
+            <tr><td>Timing paths</td><td>Critical macros placed optimally</td></tr>
+        </table>
+
+        <h2>Commands Example (Innovus)</h2>
+<pre><code># Initialize design
+read_verilog design.v
+read_lef tech.lef cell.lef
+read_sdc design.sdc
+
+# Create floorplan
+floorPlan -site core -r 1.0 0.7 10 10 10 10
+#         -site: row type
+#         -r 1.0: aspect ratio
+#         0.7: utilization
+#         10 10 10 10: margins (left bottom right top)
+
+# Place macros
+placeInstance SRAM_inst 100 200 R0
+
+# Create blockages
+createPlaceBlockage -box {0 0 50 1000} -type hard
+
+# Verify floorplan
+checkFPlan</code></pre>
+
+        <div class="summary">
+            <h3>Summary</h3>
+            <table>
+                <tr><th>Concept</th><th>Key Point</th></tr>
+                <tr><td>Floorplan</td><td>Define chip size and major blocks</td></tr>
+                <tr><td>Utilization</td><td>60-70% typical target</td></tr>
+                <tr><td>Macros</td><td>Place on edges, leave channels</td></tr>
+                <tr><td>I/O Pads</td><td>Ring around core</td></tr>
+                <tr><td>Halos</td><td>Keep-out zones around macros</td></tr>
+            </table>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="01_PD_Introduction.html" class="nav-btn prev">← Introduction</a>
+            <a href="03_Power_Planning.html" class="nav-btn next">Power Planning →</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Physical Design Blog Series | Part 2 of 10</p>
+    </div>
+</body>
+</html>

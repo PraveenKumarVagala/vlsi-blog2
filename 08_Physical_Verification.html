@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical Verification | PD Blog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1><a href="index.html">🔧 Physical Design Blog</a></h1>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="07_Timing_Closure.html">← Prev</a>
+                <a href="09_Power_Analysis.html">Next →</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="article-header">
+            <span class="article-number">Part 8 of 10</span>
+            <h1>Physical Verification</h1>
+            <p class="subtitle">DRC, LVS, and other checks before tapeout</p>
+            <p class="author">By <strong>Praveen Kumar Vagala</strong></p>
+            <div class="view-counter">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                <span class="view-count">1,024</span> views
+            </div>
+        </div>
+
+        <h2>What is Physical Verification?</h2>
+        <p>Physical verification ensures the layout can be manufactured and matches the design intent.</p>
+
+<div class="diagram">┌─────────────────────────────────────────────────────────────┐
+│              Physical Verification Checks                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  DRC (Design Rule Check)                                    │
+│    └── Can the foundry manufacture this?                    │
+│                                                              │
+│  LVS (Layout vs Schematic)                                  │
+│    └── Does layout match the netlist?                       │
+│                                                              │
+│  ERC (Electrical Rule Check)                                │
+│    └── Any floating nodes? Shorts to power?                 │
+│                                                              │
+│  Antenna Check                                               │
+│    └── Will long wires damage gates?                        │
+│                                                              │
+│  DFM (Design for Manufacturing)                              │
+│    └── Will the design yield well?                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘</div>
+
+        <h2>DRC (Design Rule Check)</h2>
+        <p>Foundry provides rules that must be followed for manufacturing.</p>
+
+        <h3>Common DRC Rules</h3>
+        <table>
+            <tr><th>Rule</th><th>Description</th><th>Example</th></tr>
+            <tr><td>Minimum width</td><td>Wire can't be too thin</td><td>M1 width ≥ 0.1μm</td></tr>
+            <tr><td>Minimum spacing</td><td>Wires must be apart</td><td>M1 space ≥ 0.1μm</td></tr>
+            <tr><td>Enclosure</td><td>Metal around via</td><td>Via1 enc by M1 ≥ 0.05μm</td></tr>
+            <tr><td>Area</td><td>Minimum metal area</td><td>M1 area ≥ 0.01μm²</td></tr>
+            <tr><td>Density</td><td>Metal fill percentage</td><td>M1 density 20-80%</td></tr>
+        </table>
+
+<div class="diagram">DRC violations:
+
+  Minimum Width:          Minimum Spacing:
+  
+  ══                      ═══  ═══
+  Bad! Too thin           Bad! Too close
+  
+  ═════                   ═══     ═══
+  Good!                   Good!
+
+
+  Via Enclosure:
+  
+  ┌──┐                    ┌────────┐
+  │▣▣│   Bad!            │  ▣▣   │  Good!
+  └──┘                    └────────┘
+  Via touches edge        Metal surrounds via</div>
+
+        <h2>LVS (Layout vs Schematic)</h2>
+        <p>Verifies the layout matches the original netlist.</p>
+
+<div class="diagram">       Netlist (Source)              Layout (GDSII)
+       
+       ┌───┐      ┌───┐              ┌───┐═════┌───┐
+       │ A │──────│ B │              │ A │     │ B │
+       └───┘      └───┘              └───┘     └───┘
+         │                             │
+         └────────┌───┐                └══════┌───┐
+                  │ C │                       │ C │
+                  └───┘                       └───┘
+                  
+       LVS Tool compares them.
+       
+       ✓ Same devices?
+       ✓ Same connections?
+       ✓ Same nets?</div>
+
+        <h3>LVS Errors</h3>
+        <table>
+            <tr><th>Error</th><th>Meaning</th><th>Common Cause</th></tr>
+            <tr><td>Short</td><td>Extra connection</td><td>Routing touches wrong net</td></tr>
+            <tr><td>Open</td><td>Missing connection</td><td>Broken route, missing via</td></tr>
+            <tr><td>Device mismatch</td><td>Wrong cell type</td><td>Wrong cell placed</td></tr>
+            <tr><td>Port mismatch</td><td>Pin not connected</td><td>Missing pin connection</td></tr>
+        </table>
+
+        <h2>ERC (Electrical Rule Check)</h2>
+        <p>Checks for electrical problems.</p>
+
+        <ul>
+            <li><strong>Floating nodes</strong> - Unconnected inputs</li>
+            <li><strong>Shorts</strong> - VDD shorted to VSS</li>
+            <li><strong>Fanout violations</strong> - Too many loads</li>
+            <li><strong>Level shifter missing</strong> - Voltage domain crossing</li>
+        </ul>
+
+        <h2>Antenna Check</h2>
+        <p>Long metal wires can damage gates during manufacturing.</p>
+
+<div class="diagram">During plasma etching:
+
+     Long metal antenna
+═══════════════════════════════►
+                                │
+                             ┌──┴──┐
+                             │Gate │ ← Charge damages gate!
+                             └─────┘
+
+Antenna Ratio = Metal Area / Gate Area
+
+If ratio > limit → violation!</div>
+
+        <h3>Antenna Fixes</h3>
+        <ul>
+            <li>Add antenna diode (drains charge)</li>
+            <li>Layer hopping (break wire with via)</li>
+            <li>Reroute on different layer</li>
+        </ul>
+
+<pre><code># Check antenna
+verifyProcessAntenna
+
+# Auto-fix antenna
+setAnalysisMode -checkAntennaEffects true
+routeDesign -fix_antenna</code></pre>
+
+        <h2>Metal Fill</h2>
+        <p>Add dummy metal to meet density rules.</p>
+
+<div class="diagram">Before fill:               After fill:
+
+═══        ═══             ═══ ▪ ▪ ▪ ═══
+                           ▪ ▪ ▪ ▪ ▪ ▪ ▪
+═══════════════            ═══════════════
+                           ▪ ▪ ▪ ▪ ▪ ▪ ▪
+    ═══                    ▪ ▪ ═══ ▪ ▪ ▪
+    
+Uneven density             Balanced density
+
+Fill metal is not connected to signals.</div>
+
+<pre><code># Add metal fill
+addFiller -cell FILL* -prefix FILL
+
+# Or density-based fill
+setFillerMode -density 0.5
+addFiller</code></pre>
+
+        <h2>Verification Flow</h2>
+
+<div class="diagram">┌─────────────────────────────────────────────────────────────┐
+│ 1. Export GDSII from P&R tool                                │
+├─────────────────────────────────────────────────────────────┤
+│ 2. Run DRC (Calibre, PVS, ICV)                               │
+│    • Fix all violations                                      │
+├─────────────────────────────────────────────────────────────┤
+│ 3. Run LVS                                                   │
+│    • Compare layout to netlist                               │
+│    • Fix shorts/opens                                        │
+├─────────────────────────────────────────────────────────────┤
+│ 4. Run Antenna check                                         │
+│    • Insert diodes if needed                                 │
+├─────────────────────────────────────────────────────────────┤
+│ 5. Add metal fill                                            │
+│    • Meet density requirements                               │
+├─────────────────────────────────────────────────────────────┤
+│ 6. Final DRC/LVS clean check                                 │
+│    • Must be 0 errors!                                       │
+└─────────────────────────────────────────────────────────────┘</div>
+
+        <h2>Verification Tools</h2>
+        <table>
+            <tr><th>Vendor</th><th>Tool</th><th>Purpose</th></tr>
+            <tr><td>Mentor</td><td>Calibre</td><td>DRC, LVS, DFM</td></tr>
+            <tr><td>Cadence</td><td>PVS/Pegasus</td><td>DRC, LVS</td></tr>
+            <tr><td>Synopsys</td><td>ICV</td><td>DRC, LVS</td></tr>
+        </table>
+
+        <h2>Common Commands</h2>
+<pre><code># In P&R tool (Innovus)
+verify_drc
+verify_connectivity -type all
+
+# Export for signoff tools
+streamOut design.gds -mapFile tech.map
+
+# Calibre (command line)
+calibre -drc -hier design.drc
+calibre -lvs design.lvs</code></pre>
+
+        <div class="summary">
+            <h3>Summary</h3>
+            <table>
+                <tr><th>Check</th><th>What It Verifies</th></tr>
+                <tr><td>DRC</td><td>Manufacturing rules</td></tr>
+                <tr><td>LVS</td><td>Layout matches netlist</td></tr>
+                <tr><td>ERC</td><td>Electrical connectivity</td></tr>
+                <tr><td>Antenna</td><td>Long wire damage</td></tr>
+                <tr><td>Metal Fill</td><td>Density requirements</td></tr>
+            </table>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="07_Timing_Closure.html" class="nav-btn prev">← Timing Closure</a>
+            <a href="09_Power_Analysis.html" class="nav-btn next">Power Analysis →</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Physical Design Blog Series | Part 8 of 10</p>
+    </div>
+</body>
+</html>

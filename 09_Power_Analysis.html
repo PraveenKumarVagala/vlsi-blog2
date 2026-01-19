@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Analysis | PD Blog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1><a href="index.html">🔧 Physical Design Blog</a></h1>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="08_Physical_Verification.html">← Prev</a>
+                <a href="10_Signoff_Tapeout.html">Next →</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="article-header">
+            <span class="article-number">Part 9 of 10</span>
+            <h1>Power Analysis</h1>
+            <p class="subtitle">IR drop, EM analysis, and power grid verification</p>
+            <p class="author">By <strong>Praveen Kumar Vagala</strong></p>
+            <div class="view-counter">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                <span class="view-count">1,098</span> views
+            </div>
+        </div>
+
+        <h2>Why Power Analysis?</h2>
+        <p>Power issues can cause chip failure even if timing is clean.</p>
+
+        <ul>
+            <li><strong>IR Drop</strong> - Voltage doesn't reach cells at full level</li>
+            <li><strong>Electromigration</strong> - High current destroys wires over time</li>
+            <li><strong>Power consumption</strong> - Heat, battery life concerns</li>
+        </ul>
+
+        <h2>IR Drop</h2>
+        <p><strong>IR Drop = Current × Resistance</strong></p>
+
+<div class="diagram">              VDD Pad = 1.0V
+                   │
+         R = 10mΩ  │
+                   ▼
+              ┌────┴────┐
+              │  0.99V  │
+              └────┬────┘
+         R = 20mΩ  │
+                   ▼
+              ┌────┴────┐
+              │  0.97V  │    ← Cells see lower voltage!
+              └────┬────┘
+         R = 30mΩ  │
+                   ▼
+              ┌────┴────┐
+              │  0.94V  │    ← 6% drop - may cause failures!
+              └─────────┘</div>
+
+        <h3>Static IR Drop</h3>
+        <p>Average voltage drop based on average current draw.</p>
+
+        <h3>Dynamic IR Drop</h3>
+        <p>Instantaneous drop during switching (much worse than static).</p>
+
+<div class="diagram">            Static                    Dynamic
+            
+Voltage:    ───────────────           ─────╲  ╱─────
+            Constant drop                   ╲╱
+                                        Sudden dip during
+                                        switching!</div>
+
+        <h2>IR Drop Analysis</h2>
+<pre><code># Setup power analysis (Voltus/Innovus)
+read_activity_file -format VCD design.vcd
+# or
+read_activity_file -format SAIF design.saif
+
+# Set power pads
+set_power_pads -net VDD -pad {PAD_VDD*}
+set_power_pads -net VSS -pad {PAD_VSS*}
+
+# Run analysis
+analyze_power_grid -net VDD
+analyze_power_grid -net VSS
+
+# Check IR drop
+report_power_rail_results</code></pre>
+
+        <h3>IR Drop Guidelines</h3>
+        <table>
+            <tr><th>Type</th><th>Limit</th></tr>
+            <tr><td>Static IR</td><td>< 5% of VDD</td></tr>
+            <tr><td>Dynamic IR</td><td>< 10% of VDD</td></tr>
+            <tr><td>Hot spots</td><td>Identify and fix</td></tr>
+        </table>
+
+        <h2>Fixing IR Drop</h2>
+<div class="diagram">IR Drop Fixes:
+
+1. Add more power straps       2. Widen power straps
+   ║ ║ ║ ║ ║ ║ ║ ║              ║     ║     ║
+   (more straps)                (wider straps)
+
+3. Add more power pads         4. Reduce switching
+   ▓VDD▓   ▓VDD▓               (clock gating, lower freq)
+   (more pads at edge)
+
+5. Move high-current blocks closer to power pads</div>
+
+        <h2>Electromigration (EM)</h2>
+        <p>High current density causes metal atoms to move, eventually breaking wires.</p>
+
+<div class="diagram">         Current flow →
+    ═══════════════════════════
+              ↓ ↓ ↓
+         Metal atoms move
+              ↓ ↓ ↓
+    ═══════╳═══════════════════
+           │
+         Void forms → Wire breaks!</div>
+
+        <h3>EM Rules</h3>
+        <table>
+            <tr><th>Parameter</th><th>Description</th></tr>
+            <tr><td>Javg</td><td>Average current density limit</td></tr>
+            <tr><td>Jpeak</td><td>Peak current density limit</td></tr>
+            <tr><td>Jrms</td><td>RMS current density limit</td></tr>
+        </table>
+
+<pre><code># EM analysis
+analyze_rail -type em -net VDD
+
+# Check EM violations
+report_em_violations
+
+# Typical limits (example):
+# Javg: 1 mA/um for M1
+# Javg: 2 mA/um for upper metals</code></pre>
+
+        <h3>Fixing EM Violations</h3>
+        <ul>
+            <li>Widen power straps/rails</li>
+            <li>Add parallel straps</li>
+            <li>Use thicker metal layers</li>
+            <li>Reduce current (lower frequency, clock gating)</li>
+        </ul>
+
+        <h2>Power Consumption Analysis</h2>
+
+        <h3>Power Components</h3>
+<pre><code>Total Power = Dynamic Power + Static Power
+
+Dynamic = α × C × V² × f
+  α = switching activity
+  C = capacitance
+  V = voltage
+  f = frequency
+
+Static = I_leak × V
+  I_leak = leakage current</code></pre>
+
+        <h3>Power Report</h3>
+<pre><code># Generate power report
+report_power -hierarchy
+
+Example output:
+Module          Switching   Internal   Leakage    Total
+─────────────────────────────────────────────────────────
+top             125.3mW     85.2mW     5.1mW      215.6mW
+  cpu_core       80.1mW     52.3mW     3.2mW      135.6mW
+  cache          35.2mW     25.1mW     1.5mW       61.8mW
+  peripherals    10.0mW      7.8mW     0.4mW       18.2mW</code></pre>
+
+        <h2>Power Optimization</h2>
+        <table>
+            <tr><th>Technique</th><th>Reduces</th><th>Method</th></tr>
+            <tr><td>Clock gating</td><td>Dynamic</td><td>Turn off clock to idle blocks</td></tr>
+            <tr><td>Multi-Vt</td><td>Leakage</td><td>Use HVT on non-critical paths</td></tr>
+            <tr><td>Power gating</td><td>Both</td><td>Turn off power to idle blocks</td></tr>
+            <tr><td>DVFS</td><td>Both</td><td>Lower V and f when not needed</td></tr>
+            <tr><td>Operand isolation</td><td>Dynamic</td><td>Hold inputs stable</td></tr>
+        </table>
+
+        <h2>Power Grid Sign-off Flow</h2>
+
+<div class="diagram">┌─────────────────────────────────────────────────────────────┐
+│ 1. Extract power grid resistance                             │
+│    • RC extraction of power nets                            │
+├─────────────────────────────────────────────────────────────┤
+│ 2. Get switching activity                                    │
+│    • VCD/SAIF from simulation                               │
+│    • or vectorless (statistical)                            │
+├─────────────────────────────────────────────────────────────┤
+│ 3. Static IR drop analysis                                   │
+│    • Check average drop                                     │
+├─────────────────────────────────────────────────────────────┤
+│ 4. Dynamic IR drop analysis                                  │
+│    • Check peak drop during switching                       │
+├─────────────────────────────────────────────────────────────┤
+│ 5. EM analysis                                               │
+│    • Check current density limits                           │
+├─────────────────────────────────────────────────────────────┤
+│ 6. Fix violations and iterate                                │
+│    • Strengthen power grid where needed                     │
+└─────────────────────────────────────────────────────────────┘</div>
+
+        <h2>Power Analysis Tools</h2>
+        <table>
+            <tr><th>Vendor</th><th>Tool</th><th>Purpose</th></tr>
+            <tr><td>Cadence</td><td>Voltus</td><td>Power/IR/EM analysis</td></tr>
+            <tr><td>Synopsys</td><td>PrimeTime PX</td><td>Power analysis</td></tr>
+            <tr><td>Synopsys</td><td>RedHawk</td><td>IR/EM analysis</td></tr>
+            <tr><td>ANSYS</td><td>RedHawk-SC</td><td>IR/EM analysis</td></tr>
+        </table>
+
+        <div class="summary">
+            <h3>Summary</h3>
+            <table>
+                <tr><th>Check</th><th>Limit</th></tr>
+                <tr><td>Static IR drop</td><td>< 5% VDD</td></tr>
+                <tr><td>Dynamic IR drop</td><td>< 10% VDD</td></tr>
+                <tr><td>EM (Javg)</td><td>Per layer limit</td></tr>
+                <tr><td>Power consumption</td><td>Meet power budget</td></tr>
+            </table>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="08_Physical_Verification.html" class="nav-btn prev">← Physical Verification</a>
+            <a href="10_Signoff_Tapeout.html" class="nav-btn next">Signoff & Tapeout →</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Physical Design Blog Series | Part 9 of 10</p>
+    </div>
+</body>
+</html>
