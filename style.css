@@ -1,0 +1,457 @@
+/* Physical Design Blog Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.8;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+.header {
+    background: linear-gradient(90deg, #0f3460, #533483);
+    padding: 20px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header h1 {
+    color: #00d4ff;
+    font-size: 1.8em;
+}
+
+.header h1 a {
+    color: #00d4ff;
+    text-decoration: none;
+}
+
+.header h1 a:hover {
+    text-shadow: 0 0 10px #00d4ff;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: #00d4ff;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid #2a3f5f;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.nav-links a:hover {
+    background: #00d4ff;
+    color: #1a1a2e;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #0f3460, #1e3a5f);
+    border-radius: 15px;
+    margin-bottom: 40px;
+    border: 1px solid #2a3f5f;
+}
+
+.hero h1 {
+    color: #00d4ff;
+    font-size: 2.8em;
+    margin-bottom: 15px;
+}
+
+.hero .subtitle {
+    color: #aaa;
+    font-size: 1.3em;
+    margin-bottom: 20px;
+}
+
+.hero .description {
+    color: #ccc;
+    font-size: 1.1em;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.article-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #00d4ff;
+}
+
+.article-header .article-number {
+    display: inline-block;
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    color: #1a1a2e;
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.article-header h1 {
+    color: #ffffff;
+    font-size: 2.4em;
+    margin: 10px 0;
+}
+
+.article-header .subtitle {
+    color: #888;
+    font-size: 1.2em;
+}
+
+.article-header .author {
+    color: #00d4ff;
+    font-size: 1em;
+    margin-top: 15px;
+}
+
+h2 {
+    color: #00d4ff;
+    font-size: 1.6em;
+    margin: 35px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #2a3f5f;
+}
+
+h3 {
+    color: #ffffff;
+    font-size: 1.3em;
+    margin: 25px 0 15px;
+}
+
+p {
+    margin-bottom: 15px;
+    color: #ccc;
+}
+
+ul, ol {
+    margin: 15px 0 15px 30px;
+    color: #ccc;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+pre {
+    background: #0a0a15;
+    border: 1px solid #2a3f5f;
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 20px 0;
+    border-left: 4px solid #2a3f5f;
+}
+
+code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.95em;
+    color: #00d4ff;
+}
+
+pre code {
+    color: #e0e0e0;
+}
+
+.diagram {
+    background: #0a0a15;
+    border: 1px solid #2a3f5f;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-family: 'Consolas', monospace;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.4;
+    color: #00d4ff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #0a0a15;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #2a3f5f;
+}
+
+th {
+    background: linear-gradient(135deg, #0f3460, #1e3a5f);
+    color: #00d4ff;
+    font-weight: 600;
+}
+
+td {
+    color: #ccc;
+}
+
+tr:hover {
+    background: #151530;
+}
+
+.tip {
+    background: linear-gradient(135deg, #1a3a2a 0%, #0d251d 100%);
+    border-left: 4px solid #2a3f5f;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.tip strong {
+    color: #00d4ff;
+}
+
+.warning {
+    background: linear-gradient(135deg, #3a2a1a 0%, #251d0d 100%);
+    border-left: 4px solid #ff8800;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.warning strong {
+    color: #ff8800;
+}
+
+.summary {
+    background: linear-gradient(90deg, #0f3460, #533483);
+    border: 1px solid #2a3f5f;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 30px 0;
+}
+
+.summary h3 {
+    color: #00d4ff;
+    margin-top: 0;
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #2a3f5f;
+}
+
+.nav-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(90deg, #0f3460, #533483);
+    color: #00d4ff;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid #2a3f5f;
+    transition: all 0.3s;
+}
+
+.nav-btn:hover {
+    background: #00d4ff;
+    color: #1a1a2e;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.blog-card {
+    background: linear-gradient(135deg, #1e2a4a 0%, #1a1a2e 100%);
+    border: 1px solid #2a3f5f;
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: block;
+}
+
+.blog-card:hover {
+    border-color: #00d4ff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+}
+
+.blog-card .card-number {
+    color: #00d4ff;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.blog-card h3 {
+    color: #ffffff;
+    margin: 10px 0;
+    font-size: 1.2em;
+}
+
+.blog-card p {
+    color: #888;
+    font-size: 0.95em;
+    margin: 0;
+}
+
+.footer {
+    text-align: center;
+    padding: 30px;
+    border-top: 1px solid #2a3f5f;
+    margin-top: 50px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .hero h1 {
+        font-size: 2em;
+    }
+    
+    .article-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .nav-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-btn {
+        text-align: center;
+    }
+    
+    .diagram {
+        font-size: 0.8em;
+    }
+}
+
+/* View Counter */
+.view-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #1e2a4a, #162035);
+    border: 1px solid #ffd700;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    color: #ffd700;
+    margin-top: 15px;
+}
+
+.view-counter svg {
+    width: 18px;
+    height: 18px;
+    fill: #ffd700;
+}
+
+.view-count {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.hero .view-counter {
+    margin-top: 20px;
+}
+
+/* Cross-Promotion Section */
+.promo-section {
+    margin-top: 50px;
+    padding-top: 40px;
+    border-top: 2px solid #2a3f5f;
+}
+
+.promo-section h2 {
+    color: #00d4ff;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.promo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.promo-card {
+    background: linear-gradient(135deg, #1e2a4a 0%, #162035 100%);
+    border: 2px solid #2a3f5f;
+    border-radius: 15px;
+    padding: 30px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.promo-card:hover {
+    border-color: #00d4ff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+}
+
+.promo-card .promo-icon {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+.promo-card h3 {
+    color: #00d4ff;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.promo-card p {
+    color: #aaa;
+    font-size: 0.95em;
+    margin-bottom: 15px;
+}
+
+.promo-card .promo-count {
+    color: #888;
+    font-size: 0.85em;
+}
